@@ -1,0 +1,26 @@
+@import '_variables';
+
+body {
+    font: 100% $font-stack;
+    color: $primary-color;
+
+    background-color: $background-color;
+
+    height: 100%;
+    max-height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    
+    div {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .newWordGroup{
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+    }
+}
