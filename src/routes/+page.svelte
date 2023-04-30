@@ -8,10 +8,18 @@
     import { onMount } from "svelte";
     import randomWords from "random-words"
     import { guesses } from "./stores.js"
-    
+    import Guess from "./Guess.svelte"
+	import Infoboard from "./Infoboard.svelte";
+
+
     let word = "";
     let synonyms = [];
     let score = 0;
+
+    // $: gameActive = +$guesses != 0;
+    let gameActive = false;
+    let scoreScreen = false;
+    let facit = false;
 
     async function setWord(newWord="error") {
         word = newWord;
@@ -21,6 +29,8 @@
             newWordInput.value = "";
         }
         synonyms = await getSynonyms(word)
+        score = 0;
+        scoreScreen = false;
         $guesses = [] 
     }
     
@@ -34,7 +44,6 @@
             }
         })
         .then(response => response.json())
-        console.log(response);
         if (typeof(response[0]) == typeof("")){
             return setWord(response[Math.floor(Math.random() * response.length)])
         }
@@ -48,52 +57,83 @@
                 words.splice(i, 1);
             }
         }
-        return words
+        return [...new Set(words)];
     }
     
     function guessSynonym(event) {
         let guess = event.target.value;
-        let correct = synonyms.includes(guess.toLowerCase());
-        $guesses = [{"guess":guess, "correct":correct}, ...$guesses];
-        score += +correct
-        event.target.value = "";
-        console.log($guesses);
+        if (guess != "") {
+            let correct = synonyms.includes(guess.toLowerCase());
+            $guesses = [{"guess":guess, "correct":correct}, ...$guesses];
+            score += +correct
+            synonyms = synonyms.filter( e => e != guess )
+            event.target.value = "";
+        }
     }
-// {"guess":guess, "correct":synonyms.includes(guess.toLowerCase())}
+
     function handleKeyDown(event) {
         let key = event.key;
         if (key == "Enter") {
             if (event.target.id == "wordsInput"){
-                guessSynonym(event)
+                if (+$guesses == 0) {
+                    gameActive = true;
+                }
+                if (gameActive) {
+                    guessSynonym(event)
+                }
+            }
+            else if (event.target.id == "newWordInput") {
+                setWord()
             }
         }
     }
     onMount( () => setWord(randomWords(1)[0]))
     
+    function handleStart(){
+
+    }
+
+
+    function handleEnd(event) {
+        gameActive = false;
+        scoreScreen = true;
+    }
+
 </script>
 
-{#if word != undefined}
-<div class="synonym">{ word.toLowerCase() }</div>
-{/if}
 
-<div>Score: { score }</div>
+<div class="centerContent">
 
-<input id="wordsInput" class="" placeholder="Synonym" tabindex="0" autocomplete="off" autocapitalize="off" autocorrect="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" list="autocompleteOff">
-
-{#each $guesses as guesses, i}
-    {#if guesses.correct}
-        <div style="color:lime">
-            { guesses.guess }
-        </div>
-    {:else}
-        <div style="color:red">
-            { guesses.guess }
-        </div>  
+    {#if word != undefined}
+    <div class="synonym">{ word.toLowerCase() }</div>
     {/if}
-{/each}
-
-<div class="newWordGroup">
-    <input placeholder="New word?" id="newWordInput">
-    <button on:click={ () => setWord()}></button>
-</div>
+    
+    <Infoboard running={gameActive} on:gameEnd={handleEnd} bind:score={score} scoreScreen={scoreScreen}></Infoboard>
+    {#if !scoreScreen}
+        <input id="wordsInput" class="primaryInput" placeholder="synonym" tabindex="0" autocomplete="off" autocapitalize="off" autocorrect="off" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false" list="autocompleteOff">
+    {/if}
+    {#if gameActive || scoreScreen}
+        <div class="wordList">
+            {#each $guesses as guesses}
+                <Guess {...guesses}></Guess>
+            {/each}
+        </div>
+    {/if}
+    {#if !gameActive}
+        <input placeholder="change word" id="newWordInput">
+        <button on:click={() => setWord(randomWords(1)[0])}>random new word</button>
+    {/if}
+    {#if scoreScreen}
+        <button on:click={() => facit = !facit}>correct words</button>
+        {#if facit}
+            <div class="wordList">
+                {#each synonyms as synonym}
+                    <div class="word small">
+                        { synonym }
+                    </div>
+                {/each} 
+            </div>
+        {/if} 
+    {/if}
+</div>    
 
