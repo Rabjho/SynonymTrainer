@@ -3,7 +3,6 @@ import { json } from '@sveltejs/kit';
 import { MWThesaurus } from '$env/static/private';
 
 
-
 export async function POST({ request }) {
     const word = await request.json();
     
