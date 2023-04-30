@@ -3,7 +3,7 @@
     const dispatch = createEventDispatcher();
     export const id="Infoboard"
     export let score = 0;
-    export const timerLength = 1;
+    export const timerLength = 15;
     export let running = true; 
     export let scoreScreen = false;
     let counter = timerLength;
@@ -44,7 +44,7 @@
         transition: .125s;
         width: 100%;
         justify-items: center;
-        padding: 0.25rem 1rem;        
+        padding: 0rem 1rem;        
         width: auto;
         justify-self: center;
         div {

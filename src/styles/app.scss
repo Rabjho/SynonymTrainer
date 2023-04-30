@@ -62,7 +62,7 @@ body {
     button {
         display: block;
         background-color: $sub-alt-color;
-        color: $text-color;
+        color: $sub-color;
         border: none;
         padding: 0.5rem;
         border-radius: 0.5rem;
@@ -74,6 +74,9 @@ body {
         }
         &::placeholder{
             text-align: center;
+        }
+        &:hover {
+            color: $text-color;
         }
     }
 
